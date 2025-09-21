@@ -9,7 +9,7 @@ class PriceLevel:
     def __init__(self, symbol:str ,price:float):
         self.symbol= symbol
         self.price = price
-        self.queue = deque() # double ended queue with the orders ids
+        self.queue = deque() # double ended queue with the orders
         
     def append(self,order:Order) -> None:
         """Append a new resting order to the tail (time priority)."""
@@ -19,7 +19,7 @@ class PriceLevel:
 
     # Take the first order in     
     def peek(self) -> None:
-        """Return the head order without removing it."""
+        """Return the first order without removing it."""
         if not self.queue:
             return None 
         else:
@@ -27,7 +27,7 @@ class PriceLevel:
 
     
     def popleft(self):
-        """Remove and return the head order (or None if empty)."""
+        """Remove and return the first order (or None if empty)."""
         if self.queue:
             return self.queue.popleft()
         else: None
@@ -35,11 +35,10 @@ class PriceLevel:
     def cancel(self, order_id: int) -> bool:
         """
         Remove the order with this id if present; return True if removed, else False.
-        (O(n) scan, which is fine for first versioin)
         """
         for i, o in enumerate(self.queue):
-            if o.order_id == order_id:
-                del self._q[i]      # preserves relative order of the rest
+            if o.orderid == order_id:
+                del self.queue[i]      # preserves relative order of the rest
                 return True
         return False
     
@@ -48,6 +47,7 @@ class PriceLevel:
         return sum(o.qty for o in self.queue if o.qty > 0)
 
     def __len__(self) -> int:
+        "Return the lenght of the queue"
         return len(self.queue)
 
     def __iter__(self) -> Iterator[Order]:
