@@ -1,0 +1,7 @@
+ LOB:
+ 1. types.py --> define the types of the variables in the orde : side,orderid,qty.time
+ ====================================================================================================
+ 2. order.py --> Create Order class 
+ ====================================================================================================
+ 3. price_level.py --> Create Order PriceLevel class which is essentially 
+                        a queue of orders at the same price 
