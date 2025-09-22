@@ -47,12 +47,12 @@ class OrderBook:
 
 
     def best_bid(self):
-        return(max(self.bids.keys(),None))
+        return(max(self.bids.keys(), default = None))
     
 
     
     def best_ask(self):
-        return(min(self.asks.keys(),None))
+        return(min(self.asks.keys(), default = None))
     
 
     
@@ -81,15 +81,27 @@ class OrderBook:
         if order.side == 'B':
             #Aggressive BUY order
             if self.best_ask() is not None and order.price >= self.best_ask():
-                trades = self.matching_engine(order)
+                trades = self.matching_engine_bid(order) # we use = as matching engine already return a list
             else:
                 # It's a passive buy order
                 self.add_order(order)
-    
-    ## CONTINUE WITH THE OTHER SIDE OF THE PROCESSING (should be the same logic inverted in signs)
+
+        if order.side =='S':
+            #Aggressive SELL order
+            if self.best_bid() is not None and order.price <= self.best_bid():
+                trades = self.matching_engine_ask(order) # we use = as matching engine already return a list
+
+            else:
+                # It's a passive sell order
+                self.add_order(order)
+
+        
+        return trades
 
     
-    def matching_engine(self, incoming_order:Order):
+
+
+    def matching_engine_bid(self, incoming_order:Order):
         "we trade --> we take best bid with the best asks "
         "we look for the qty in price level orders we clear the cleareble qty "
         "then we reduce the orders and update the Pricelevels queues accordingly" 
@@ -132,6 +144,53 @@ class OrderBook:
 
         return trades
 
+
+
+
+
+
+    def matching_engine_ask(self, incoming_order:Order):
+        "we trade --> we take best ask with the best bid "
+        "we look for the qty in price level orders we clear the cleareble qty "
+        "then we reduce the orders and update the Pricelevels queues accordingly" 
+        trades=[]
+        
+        while (incoming_order.qty>0) and (incoming_order.price<=self.best_bid()) and (self.best_bid() is not None):
+            best_price = self.best_bid()
+            best_price_level_queue = self.bids[best_price] # bestprice queue
+            best_matching_order = best_price_level_queue.peek() # this return the firstm order(head) of the queue of that price level 
+            
+            #Trade 
+            traded_quantity = min(best_matching_order.qty,incoming_order.qty)
+
+            trade = Trade(qty=traded_quantity, 
+                          price=best_price, 
+                          maker_order_id = best_matching_order.orderid,
+                          take_order_id = incoming_order.orderid 
+                          )            
+            
+            #reduce the quantity of the orders by the cleared volumes
+            # recall that that reduce() sends to 0 qty if q>qty
+            incoming_order.reduce(traded_quantity) #reduce bid
+            best_matching_order.reduce(traded_quantity) #reduce ask
+
+            
+            if best_matching_order.qty == 0:
+        
+                cleared_bid_order = best_price_level_queue.popleft() #remove from the pricelevelqueue the cleared order
+                del self.index[cleared_bid_order.orderid] #and remove if from the dictionary
+
+                # if the entire price level is empty --> remove the pricelevel queue
+                if len(best_price_level_queue)==0:
+                    del self.bids[best_price] # remove the entire empty queue to the while check the next best_ask in the OB automatically
+
+            trades.append(trade)
+
+        # If the incoming order is not cleared completely we add it in the resting order 
+        if incoming_order.qty>0:
+            self.add_order(incoming_order)
+
+        return trades
 
 
             

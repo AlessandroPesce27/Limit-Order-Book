@@ -5,7 +5,7 @@ class Order:
     def __init__(self, 
                  symbol:Symbol ,
                  exchange:Exchange,
-                 orderId:OrderId ,
+                 orderid:OrderId ,
                  side:Side ,
                  price:Price,
                  qty:Qty,
@@ -15,7 +15,7 @@ class Order:
         self.side = side
         self.symbol = symbol
         self.exchange = exchange
-        self.orderid = orderId
+        self.orderid = orderid
         self.price = price
         self.qty = qty
         self.timestamp = timestamp
