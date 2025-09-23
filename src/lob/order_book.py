@@ -11,7 +11,7 @@ class Trade:
     qty: int
     price: int
     maker_order_id: int # The MAKER --> is the passive order 'making the market'
-    take_order_id: int ## The TAKER --> is the aggressive order 'taking the market'
+    taker_order_id: int ## The TAKER --> is the aggressive order 'taking the market'
 
 
 class OrderBook:
@@ -107,7 +107,7 @@ class OrderBook:
         "then we reduce the orders and update the Pricelevels queues accordingly" 
         trades=[]
         
-        while (incoming_order.qty>0) and (incoming_order.price>=self.best_ask()) and (self.best_ask() is not None):
+        while (incoming_order.qty>0) and (self.best_ask() is not None) and  (incoming_order.price>=self.best_ask()):
             best_price = self.best_ask()
             best_price_level_queue = self.asks[best_price] # bestprice queue
             best_matching_order = best_price_level_queue.peek() # this return the firstm order(head) of the queue of that price level 
@@ -118,7 +118,7 @@ class OrderBook:
             trade = Trade(qty=traded_quantity, 
                           price=best_price, 
                           maker_order_id = best_matching_order.orderid,
-                          take_order_id = incoming_order.orderid 
+                          taker_order_id = incoming_order.orderid 
                           )            
             
             #reduce the quantity of the orders by the cleared volumes
@@ -155,7 +155,7 @@ class OrderBook:
         "then we reduce the orders and update the Pricelevels queues accordingly" 
         trades=[]
         
-        while (incoming_order.qty>0) and (incoming_order.price<=self.best_bid()) and (self.best_bid() is not None):
+        while (incoming_order.qty>0) and (self.best_bid() is not None) and (incoming_order.price<=self.best_bid()) :
             best_price = self.best_bid()
             best_price_level_queue = self.bids[best_price] # bestprice queue
             best_matching_order = best_price_level_queue.peek() # this return the firstm order(head) of the queue of that price level 
@@ -166,7 +166,7 @@ class OrderBook:
             trade = Trade(qty=traded_quantity, 
                           price=best_price, 
                           maker_order_id = best_matching_order.orderid,
-                          take_order_id = incoming_order.orderid 
+                          taker_order_id = incoming_order.orderid 
                           )            
             
             #reduce the quantity of the orders by the cleared volumes

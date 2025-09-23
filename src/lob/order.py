@@ -1,4 +1,5 @@
 from lob.types import Side, OrderId, Price, Qty, Timestamp,Symbol,Exchange 
+from datetime import datetime
 
 class Order:
     
@@ -24,10 +25,10 @@ class Order:
         if self.side not in  {"B", "S"}:
             raise ValueError(f'invalid {self.side} must be B or S') 
         
-        if not isinstance(self.exchange, Exchange):
+        if not isinstance(self.exchange, str):
             raise ValueError(f'invalid {self.exchange}, must be of type Str')
         
-        if not isinstance(self.symbol,Symbol):
+        if not isinstance(self.symbol,str):
             raise ValueError(f'invalid {self.symbol}, must be of type Str')
 
         if self.price <= 0:
@@ -36,7 +37,7 @@ class Order:
         if self.qty <=0: 
             raise ValueError(f'invalid {self.qty} must be >0') 
 
-        if self.timestamp < 0:
+        if not isinstance(self.timestamp, datetime):
             raise ValueError(f'invalid {self.timestamp} must be >= 0') 
         
         if self.orderid <=0:

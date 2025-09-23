@@ -3,9 +3,9 @@
 from typing import Literal 
 
 Side = Literal['B','S'] # buy ore sell
-Symbol = str()
-Exchange = str()
-OrderId = int() 
-Price = float()
-Qty = int()
-Timestamp = int()
+Symbol = str
+Exchange = str
+OrderId = int
+Price = int # in cents
+Qty = int
+Timestamp = int

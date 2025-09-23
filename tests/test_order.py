@@ -1,27 +1,65 @@
 import pytest
 from lob.order import Order
+from datetime import datetime
 
 def test_order_valid():
-    o = Order(1, "B", 100.0, 5, 0)
+    """Tests that a valid Order object can be created and is active."""
+    o = Order(
+        symbol="TEST", 
+        exchange="XTEST", 
+        orderid=1, 
+        side="B", 
+        price=10000, 
+        qty=5, 
+        timestamp=datetime.now()
+    )
     assert o.is_active
     assert o.qty == 5
 
-def test_reduce_to_zero():
-    o = Order(2, "S", 101.0, 3, 1)
-    o.reduce(2)
-    assert o.qty == 1
+def test_reduce_quantity():
+    """Tests that the reduce method correctly adjusts the order's quantity."""
+    o = Order(
+        symbol="TEST", 
+        exchange="XTEST", 
+        orderid=2, 
+        side="S", 
+        price=10100, 
+        qty=10, 
+        timestamp=datetime.now()
+    )
+    # Reduce by a smaller amount
+    o.reduce(3)
+    assert o.qty == 7
+    assert o.is_active
+
+    # Reduce by a larger amount (should set qty to 0)
     o.reduce(10)
     assert o.qty == 0
     assert not o.is_active
 
 def test_invalid_inputs():
-    with pytest.raises(ValueError): Order(3, "X", 100.0, 1, 0)
-    with pytest.raises(ValueError): Order(4, "B", -1.0, 1, 0)
-    with pytest.raises(ValueError): Order(5, "S", 100.0, 0, 0)
-    with pytest.raises(ValueError): Order(6, "B", 100.0, 1, -1)
-    with pytest.raises(ValueError): Order(0, "B", 100.0, 1, 0)
+    """Tests that the Order class raises ValueErrors for invalid constructor arguments."""
+    now = datetime.now()
+    # Invalid side
+    with pytest.raises(ValueError): Order("TEST", "XTEST", 3, "X", 10000, 1, now)
+    # Invalid price
+    with pytest.raises(ValueError): Order("TEST", "XTEST", 4, "B", -100, 1, now)
+    # Invalid quantity
+    with pytest.raises(ValueError): Order("TEST", "XTEST", 5, "S", 10000, 0, now)
+    # Invalid order ID
+    with pytest.raises(ValueError): Order("TEST", "XTEST", 0, "B", 10000, 1, now)
+
 
 def test_reduce_negative_amount():
-    o = Order(7, "B", 100.0, 2, 0)
+    """Tests that reducing by a negative quantity raises a ValueError."""
+    o = Order(
+        symbol="TEST", 
+        exchange="XTEST", 
+        orderid=7, 
+        side="B", 
+        price=10000, 
+        qty=2, 
+        timestamp=datetime.now()
+    )
     with pytest.raises(ValueError):
         o.reduce(-1)
